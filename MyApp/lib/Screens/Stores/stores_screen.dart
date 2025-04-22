@@ -1,3 +1,4 @@
+// Imports (same as before)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_ass/providers/store_provider.dart';
@@ -96,9 +97,6 @@ class _StoresScreenState extends State<StoresScreen> {
             ElevatedButton(
               onPressed: () => storeProvider.fetchStores(),
               child: const Text('Retry'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
             ),
           ],
         ),
@@ -106,24 +104,7 @@ class _StoresScreenState extends State<StoresScreen> {
     }
 
     if (storeProvider.stores.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.store_mall_directory, size: 50, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'No stores available',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => storeProvider.fetchStores(),
-              child: const Text('Refresh Stores'),
-            ),
-          ],
-        ),
-      );
+      return const Center(child: Text('No stores available'));
     }
 
     return Scrollbar(
@@ -160,9 +141,7 @@ class _StoresScreenState extends State<StoresScreen> {
               ),
               title: Text(
                 store.storeName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,10 +149,7 @@ class _StoresScreenState extends State<StoresScreen> {
                   const SizedBox(height: 4),
                   Text(
                     store.storeType.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -209,7 +185,16 @@ class _StoresScreenState extends State<StoresScreen> {
                   ),
                 ],
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: IconButton(
+                icon: Icon(
+                  store.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: store.isFavorite ? Colors.red : Colors.grey,
+                ),
+                onPressed: () {
+                  Provider.of<StoreProvider>(context, listen: false)
+                      .toggleFavorite(store);
+                },
+              ),
               onTap: () {
                 // Navigate to store details if needed
               },

@@ -5,6 +5,7 @@ class Store {
   final String storeType;
   final double rating;
   final bool isOpen;
+  bool isFavorite;
 
   Store({
     required this.storeName,
@@ -13,6 +14,7 @@ class Store {
     required this.storeType,
     required this.rating,
     required this.isOpen,
+    required this.isFavorite, // No longer default false (value comes from DB)
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,17 @@ class Store {
       storeType: json['store_type'] as String,
       rating: toDouble(json['rating']),
       isOpen: json['is_open'] as bool,
+      isFavorite: json['isFavorite'] as bool, // Match DB field name
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'store_name': storeName,
+    'lat': lat,
+    'lng': lng,
+    'store_type': storeType,
+    'rating': rating,
+    'is_open': isOpen,
+    'isFavorite': isFavorite, // Match DB field name
+  };
 }
