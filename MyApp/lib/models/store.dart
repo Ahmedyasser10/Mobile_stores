@@ -1,20 +1,20 @@
 class Store {
+  final int id;  // Change id to int
   final String storeName;
   final double lat;
   final double lng;
   final String storeType;
   final double rating;
   final bool isOpen;
-  bool isFavorite;
 
   Store({
+    required this.id,
     required this.storeName,
     required this.lat,
     required this.lng,
     required this.storeType,
     required this.rating,
     required this.isOpen,
-    required this.isFavorite, // No longer default false (value comes from DB)
   });
 
   factory Store.fromJson(Map<String, dynamic> json) {
@@ -24,23 +24,31 @@ class Store {
     }
 
     return Store(
+      id: json['id'] as int,  // Expect id to be an int
       storeName: json['store_name'] as String,
       lat: toDouble(json['lat']),
       lng: toDouble(json['lng']),
       storeType: json['store_type'] as String,
       rating: toDouble(json['rating']),
       isOpen: json['is_open'] as bool,
-      isFavorite: json['isFavorite'] as bool, // Match DB field name
     );
   }
 
   Map<String, dynamic> toJson() => {
+    'id': id,  // id is now an int
     'store_name': storeName,
     'lat': lat,
     'lng': lng,
     'store_type': storeType,
     'rating': rating,
     'is_open': isOpen,
-    'isFavorite': isFavorite, // Match DB field name
   };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Store && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

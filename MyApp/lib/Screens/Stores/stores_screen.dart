@@ -1,4 +1,3 @@
-// Imports (same as before)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_ass/providers/store_provider.dart';
@@ -39,7 +38,7 @@ class _StoresScreenState extends State<StoresScreen> {
 
   Future<void> _refreshData() async {
     final provider = Provider.of<StoreProvider>(context, listen: false);
-    await provider.fetchStores();
+    await provider.refresh();
     if (!mounted) return;
 
     if (_scrollController.hasClients) {
@@ -69,14 +68,14 @@ class _StoresScreenState extends State<StoresScreen> {
         onRefresh: _refreshData,
         child: Consumer<StoreProvider>(
           builder: (context, storeProvider, _) {
-            return _buildBody(storeProvider);
+            return _buildBody(storeProvider, context);
           },
         ),
       ),
     );
   }
 
-  Widget _buildBody(StoreProvider storeProvider) {
+  Widget _buildBody(StoreProvider storeProvider, BuildContext context) {
     if (storeProvider.isLoading && storeProvider.stores.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -95,7 +94,7 @@ class _StoresScreenState extends State<StoresScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => storeProvider.fetchStores(),
+              onPressed: () => storeProvider.refresh(),
               child: const Text('Retry'),
             ),
           ],
@@ -187,12 +186,11 @@ class _StoresScreenState extends State<StoresScreen> {
               ),
               trailing: IconButton(
                 icon: Icon(
-                  store.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: store.isFavorite ? Colors.red : Colors.grey,
+                  storeProvider.isFavorite(store) ? Icons.favorite : Icons.favorite_border,
+                  color: storeProvider.isFavorite(store) ? Colors.red : Colors.grey,
                 ),
                 onPressed: () {
-                  Provider.of<StoreProvider>(context, listen: false)
-                      .toggleFavorite(store);
+                  storeProvider.toggleFavorite(store);
                 },
               ),
               onTap: () {

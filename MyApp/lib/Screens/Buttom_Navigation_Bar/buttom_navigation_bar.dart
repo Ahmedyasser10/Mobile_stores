@@ -1,8 +1,9 @@
-// screens/custom_bottom_navigation_bar.dart
 import 'package:flutter/material.dart';
 import 'package:mobile_ass/Screens/Body/body.dart';
 import 'package:mobile_ass/Screens/Profile_Screen/profile_screnn.dart';
-import 'package:mobile_ass/Screens/Fav_Stores/FavoriteStoresScreen.dart'; // Import the new screen
+import 'package:mobile_ass/Screens/Fav_Stores/FavoriteStoresScreen.dart';
+import 'package:mobile_ass/providers/store_provider.dart';  // Import your StoreProvider
+import 'package:provider/provider.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   const CustomBottomNavigationBar({super.key});
@@ -32,6 +33,17 @@ class _CustomBottomNavigationBar extends State<CustomBottomNavigationBar> {
               setState(() {
                 _currentIndex = index;
               });
+
+              // Refetch data when navigating to Home or FavoriteStoresScreen
+              if (index == 0) {
+                // Refetch data from the provider when going to the Home screen
+                final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+                storeProvider.refresh();  // Call the refresh method to refetch data
+              } else if (index == 1) {
+                // Refetch data when going to the Favorites screen
+                final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+                storeProvider.refresh();  // Call the refresh method to refetch data
+              }
             },
             items: const [
               BottomNavigationBarItem(

@@ -1,13 +1,8 @@
-// screens/favorites/favorite_stores_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/store_provider.dart';
-import '../../models/store.dart';
-
-// screens/favorites/favorite_stores_screen.dart
-
-// Add import for DistanceScreen
-import '../Dis_Screen/DistanceScreen.dart';
+import 'package:mobile_ass/providers/store_provider.dart';
+import 'package:mobile_ass/models/store.dart';
+import 'package:mobile_ass/Screens/Dis_Screen/DistanceScreen.dart';
 
 class FavoriteStoresScreen extends StatelessWidget {
   const FavoriteStoresScreen({super.key});
@@ -28,10 +23,7 @@ class FavoriteStoresScreen extends StatelessWidget {
   }
 
   Widget _buildBody(StoreProvider storeProvider, BuildContext context) {
-    // Filter out the favorite stores
-    final favoriteStores = storeProvider.stores.where((store) => store.isFavorite).toList();
-
-    if (storeProvider.isLoading && favoriteStores.isEmpty) {
+    if (storeProvider.isLoading && storeProvider.favoriteStores.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -49,7 +41,7 @@ class FavoriteStoresScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => storeProvider.fetchStores(),
+              onPressed: () => storeProvider.refresh(),
               child: const Text('Retry'),
             ),
           ],
@@ -57,14 +49,32 @@ class FavoriteStoresScreen extends StatelessWidget {
       );
     }
 
-    if (favoriteStores.isEmpty) {
-      return const Center(child: Text('No favorite stores available'));
+    if (storeProvider.favoriteStores.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.favorite_border, size: 50, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'No favorite stores yet',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Tap the heart icon on stores to add them to favorites',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
-      itemCount: favoriteStores.length,
+      itemCount: storeProvider.favoriteStores.length,
       itemBuilder: (context, index) {
-        final store = favoriteStores[index];
+        final store = storeProvider.favoriteStores[index];
         return Card(
           margin: const EdgeInsets.all(8),
           elevation: 2,
@@ -134,17 +144,15 @@ class FavoriteStoresScreen extends StatelessWidget {
               ],
             ),
             trailing: IconButton(
-              icon: Icon(
-                store.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: store.isFavorite ? Colors.red : Colors.grey,
+              icon: const Icon(
+                Icons.favorite,
+                color: Colors.red,
               ),
               onPressed: () {
-                Provider.of<StoreProvider>(context, listen: false)
-                    .toggleFavorite(store);
+                storeProvider.toggleFavorite(store);
               },
             ),
             onTap: () {
-              // Navigate to the DistanceScreen when the store is tapped
               Navigator.push(
                 context,
                 MaterialPageRoute(
