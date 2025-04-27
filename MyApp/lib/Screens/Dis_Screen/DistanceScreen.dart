@@ -1,6 +1,6 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../models/store.dart';
 
 class DistanceScreen extends StatefulWidget {
@@ -13,68 +13,119 @@ class DistanceScreen extends StatefulWidget {
 }
 
 class _DistanceScreenState extends State<DistanceScreen> {
-  late double _currentLatitude;
-  late double _currentLongitude;
+  double? _currentLatitude;
+  double? _currentLongitude;
   String _distance = "Loading...";
+  bool _isLoading = true;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _getFakeLocation(); // Use fake location for testing
+    _getCurrentLocation();
   }
 
-  // Use fake location in Mansoura, Egypt
-  Future<void> _getFakeLocation() async {
-    // Define a fake location (Mansoura, Egypt)
-    double fakeLatitude = 31.0432;  // Mansoura's latitude
-    double fakeLongitude = 31.3793;  // Mansoura's longitude
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _distance = "Location services are disabled";
+          _errorMessage = "Please enable location services on your device";
+          _isLoading = false;
+        });
+        return;
+      }
 
-    // Once fake position is set, update state with location and distance
-    setState(() {
-      _currentLatitude = fakeLatitude;
-      _currentLongitude = fakeLongitude;
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _distance = "Location permission denied";
+            _errorMessage = "Please grant location permission in app settings";
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _distance = "Location permission permanently denied";
+          _errorMessage = "Please enable location permissions in app settings";
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      setState(() {
+        _currentLatitude = position.latitude;
+        _currentLongitude = position.longitude;
+        _isLoading = false;
+      });
+
       _calculateDistance();
-    });
+    } catch (e) {
+      setState(() {
+        _distance = "Error getting location";
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
-  // Calculate distance from current location to store location
   void _calculateDistance() {
+    if (_currentLatitude == null || _currentLongitude == null) {
+      setState(() {
+        _distance = "Location not available";
+      });
+      return;
+    }
+
     double storeLatitude = widget.store.lat;
     double storeLongitude = widget.store.lng;
 
-    // Calculate the distance using the haversine formula or any available method
     double distanceInMeters = _calculateDistanceBetweenCoordinates(
-      _currentLatitude,
-      _currentLongitude,
+      _currentLatitude!,
+      _currentLongitude!,
       storeLatitude,
       storeLongitude,
     );
 
     setState(() {
-      // Convert to kilometers and display distance
       _distance = "${(distanceInMeters / 1000).toStringAsFixed(2)} km";
     });
   }
 
-  // Function to calculate distance between two coordinates (using the haversine formula)
   double _calculateDistanceBetweenCoordinates(
-      double lat1, double lon1, double lat2, double lon2) {
-    const double earthRadius = 6371; // Radius of Earth in kilometers
+      double lat1,
+      double lon1,
+      double lat2,
+      double lon2,
+      ) {
+    const double earthRadius = 6371; // Earth's radius in kilometers
 
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);
 
-    double a = (sin(dLat / 2) * sin(dLat / 2)) +
-        (cos(_degreesToRadians(lat1)) *
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degreesToRadians(lat1)) *
             cos(_degreesToRadians(lat2)) *
             sin(dLon / 2) *
-            sin(dLon / 2));
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
-    return earthRadius * c * 1000; // Return distance in meters
+    return earthRadius * c * 1000; // Convert to meters
   }
 
-  // Convert degrees to radians
   double _degreesToRadians(double degrees) {
     return degrees * (pi / 180);
   }
@@ -106,10 +157,30 @@ class _DistanceScreenState extends State<DistanceScreen> {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
-            // Display the distance result here
-            Text(
-              'Distance: $_distance',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Distance: $_distance',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                if (_errorMessage.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage,
+                    style: const TextStyle(
+                        fontSize: 14, color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _getCurrentLocation,
+                    child: const Text('Try Again'),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
