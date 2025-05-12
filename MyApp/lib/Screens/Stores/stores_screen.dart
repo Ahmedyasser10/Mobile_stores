@@ -106,100 +106,98 @@ class _StoresScreenState extends State<StoresScreen> {
       return const Center(child: Text('No stores available'));
     }
 
-    return Scrollbar(
+    return ListView.builder(
       controller: _scrollController,
-      thumbVisibility: true,
-      thickness: 6,
-      radius: const Radius.circular(8),
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: storeProvider.stores.length,
-        itemBuilder: (context, index) {
-          final store = storeProvider.stores[index];
-          return Card(
-            margin: const EdgeInsets.all(8),
-            elevation: 2,
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 16,
+      itemCount: storeProvider.stores.length,
+      itemBuilder: (context, index) {
+        final store = storeProvider.stores[index];
+        return Card(
+          margin: const EdgeInsets.all(8),
+          elevation: 2,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 8,
+              horizontal: 16,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: store.isOpen
+                    ? Colors.green.withOpacity(0.1)
+                    : Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: store.isOpen
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+              child: Icon(
+                _getStoreIcon(store.storeType),
+                size: 30,
+                color: store.isOpen ? Colors.green : Colors.grey,
+              ),
+            ),
+            title: Text(
+              store.storeName,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  store.storeType.toUpperCase(),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
-                child: Icon(
-                  _getStoreIcon(store.storeType),
-                  size: 30,
-                  color: store.isOpen ? Colors.green : Colors.grey,
-                ),
-              ),
-              title: Text(
-                store.storeName,
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(
-                    store.storeType.toUpperCase(),
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        store.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 14),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.star, size: 16, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text(
+                      store.rating.toStringAsFixed(1),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 2,
+                        horizontal: 8,
                       ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 2,
-                          horizontal: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: store.isOpen
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          store.isOpen ? 'OPEN' : 'CLOSED',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: store.isOpen ? Colors.green : Colors.red,
-                          ),
+                      decoration: BoxDecoration(
+                        color: store.isOpen
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        store.isOpen ? 'OPEN' : 'CLOSED',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: store.isOpen ? Colors.green : Colors.red,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              trailing: IconButton(
-                icon: Icon(
-                  storeProvider.isFavorite(store) ? Icons.favorite : Icons.favorite_border,
-                  color: storeProvider.isFavorite(store) ? Colors.red : Colors.grey,
+                    ),
+                  ],
                 ),
-                onPressed: () {
-                  storeProvider.toggleFavorite(store);
-                },
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                storeProvider.isFavorite(store)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: storeProvider.isFavorite(store)
+                    ? Colors.red
+                    : Colors.grey,
               ),
-              onTap: () {
-                // Navigate to store details if needed
+              onPressed: () {
+                storeProvider.toggleFavorite(store);
               },
             ),
-          );
-        },
-      ),
+            onTap: () {
+              // Navigate to store details if needed
+            },
+          ),
+        );
+      },
     );
   }
 

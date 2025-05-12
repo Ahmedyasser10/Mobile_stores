@@ -111,7 +111,7 @@ class _DistanceScreenState extends State<DistanceScreen> {
       double lat2,
       double lon2,
       ) {
-    const double earthRadius = 6371; // Earth's radius in kilometers
+    const double earthRadius = 6371;
 
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);

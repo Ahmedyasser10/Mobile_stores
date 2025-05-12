@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile_ass/services/auth.dart';
+import 'package:mobile_ass/services/auth.dart'; // Make sure this file defines supabase and upload/update methods
 import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
@@ -59,11 +59,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (user != null) {
           String? profileImageUrl;
           if (_profileImage != null) {
-            // Upload the profile photo and get the URL
             profileImageUrl = await uploadProfilePhoto(_profileImage!, user.id);
           }
 
-          // Update user metadata
           await updateUserMetadata(
             name: _nameController.text,
             studentId: _studentIdController.text,
@@ -154,12 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextFormField(
                 controller: _studentIdController,
                 decoration: InputDecoration(labelText: 'Student ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Student ID is required';
-                  }
-                  return null;
-                },
+                enabled: false, // 🔒 Student ID field is now disabled
               ),
               SizedBox(height: 10),
               TextFormField(

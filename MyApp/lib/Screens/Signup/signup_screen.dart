@@ -91,18 +91,29 @@ class __SignUpFormState extends State<_SignUpForm> {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    // Validate FCI email structure: studentID@stud.fci-cu.edu.eg
-    final emailRegex = RegExp(r'^\d+@stud\.fci-cu\.edu\.eg$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Invalid FCI email format';
+
+    final trimmedValue = value.trim();
+
+    // Validate email structure
+    final emailRegex = RegExp(r'^(\d+)@stud\.fci-cu\.edu\.eg$');
+    final match = emailRegex.firstMatch(trimmedValue);
+    if (match == null) {
+      return 'Invalid FCI email format. Expected format: 123456@stud.fci-cu.edu.eg';
     }
-    // Check if Student ID matches email
-    final studentId = _studentIdController.text;
-    if (!value.startsWith(studentId)) {
-      return 'Student ID does not match email';
+
+    // Extract student ID from email
+    final emailId = match.group(1);
+    final enteredId = _studentIdController.text.trim();
+
+    if (emailId != enteredId) {
+      return 'Student ID in email ($emailId) does not match entered ID ($enteredId)';
     }
+
+
+
     return null;
   }
+
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
